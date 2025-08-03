@@ -27,8 +27,8 @@ public class RitualService {
     @Autowired
     RitualLogRepository ritualLogRepository;
 
-    public void createRitual(Long userId, String title){
-        User user = userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    public void createRitual(String username, String title){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
         Ritual ritual = new Ritual();
         ritual.setUser(user);
@@ -42,6 +42,7 @@ public class RitualService {
         for(int i=0 ; i<90 ; i++){
             RitualLog log = new RitualLog();
             log.setDate(today.plusDays(i));
+            log.setUser(savedRitual.getUser());
             log.setRitual(savedRitual);
             log.setCompleted(false);
             log.setMissed(false);
@@ -52,9 +53,13 @@ public class RitualService {
         ritualLogRepository.saveAll(logs);
     }
 
-    public void getTodayRitualsForUser(String username) {
+    public List<Ritual> getTodayRitualsForUser(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Invalid Request"));
+        LocalDate today = LocalDate.now();
 
+        List<RitualLog> todayRituals = ritualLogRepository.findByDateAndUserId(today, user.getId()).stream()
+                                        .filter(ritualLog -> !ritualLog.isCompleted()).toList();
 
+        return todayRituals.stream().map(RitualLog::getRitual).distinct().toList();
     }
 }

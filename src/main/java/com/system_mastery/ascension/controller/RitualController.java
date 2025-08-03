@@ -1,16 +1,13 @@
 package com.system_mastery.ascension.controller;
 
 
-import com.system_mastery.ascension.model.RitualLog;
+import com.system_mastery.ascension.dto.RitualDto;
+import com.system_mastery.ascension.model.Ritual;
 import com.system_mastery.ascension.service.RitualLogService;
 import com.system_mastery.ascension.service.RitualService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -24,14 +21,26 @@ public class RitualController {
     @Autowired
     RitualLogService ritualLogService;
 
-
-    public ResponseEntity<List<RitualLog>> getTodayRituals(Principal principal){
+    @GetMapping("ritual/today")
+    public ResponseEntity<List<Ritual>> getTodayRituals(Principal principal){
         String username = principal.getName();
-        ritualService.getTodayRitualsForUser(username);
+        List<Ritual> todayRitual = ritualService.getTodayRitualsForUser(username);
+
+        return ResponseEntity.ok(todayRitual);
     }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> createRitual(@RequestBody RitualDto ritualDto, Principal principal) {
+        ritualService.createRitual(principal.getName(), ritualDto.getName());
+
+        return ResponseEntity.ok("Ritual created successfully");
+    }
+
 
     @PostMapping("/complete/{ritualLogId}")
     public ResponseEntity<String> completeRitual(@PathVariable Long ritualLogId, Principal principal){
         ritualLogService.markRitualAsCompleted(ritualLogId, principal.getName());
+
+        return ResponseEntity.ok("Ritual has been completed");
     }
 }

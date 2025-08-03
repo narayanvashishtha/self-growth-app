@@ -28,4 +28,9 @@ public class RitualLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ritual_id", nullable = false)
     private Ritual ritual;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
 }
