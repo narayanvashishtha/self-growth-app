@@ -17,17 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -55,18 +52,25 @@ public class AuthService {
     }
 
     public AuthResponseDto login(AuthRequestDto requestDto){
-
         String username = requestDto.getUsername();
         String password = requestDto.getPassword();
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
 
-        // if no exception thrown → authenticated
-        User user = userRepository.findByUsername(username).get();
-        String token = jwtTokenProvider.generateToken(user);
+            System.out.println("Authentication successful for: " + username);
 
-        return new AuthResponseDto(token, jwtTokenProvider.getExpirationInMs());
+            // if no exception thrown → authenticated
+            User user = userRepository.findByUsername(username).get();
+            String token = jwtTokenProvider.generateToken(user);
+
+            return new AuthResponseDto(token, jwtTokenProvider.getExpirationInMs());
+
+        } catch (Exception e) {
+            System.out.println("Authentication failed for " + username + ": " + e.getMessage());
+            throw new RuntimeException("Invalid credentials", e);
+        }
     }
 }
