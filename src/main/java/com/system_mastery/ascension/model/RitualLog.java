@@ -2,6 +2,7 @@ package com.system_mastery.ascension.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,9 @@ public class RitualLog {
 
     private int xpPenalty;
 
+    @Setter
+    private int xpValue;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ritual_id", nullable = false)
     private Ritual ritual;
@@ -32,5 +36,6 @@ public class RitualLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
 
 }

@@ -15,4 +15,5 @@ import java.util.List;
 public interface RitualLogRepository extends JpaRepository<RitualLog, Long> {
     List<RitualLog> findByDate(LocalDate date);
     List<RitualLog> findByDateAndUserId(LocalDate date, Long userId);
+    List<RitualLog> findByUserId(Long userId);
 }

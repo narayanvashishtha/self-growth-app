@@ -1,6 +1,5 @@
 package com.system_mastery.ascension.service;
 
-
 import com.system_mastery.ascension.model.Ritual;
 import com.system_mastery.ascension.model.RitualLog;
 import com.system_mastery.ascension.model.User;
@@ -31,33 +30,13 @@ public class RitualLogService {
 
         LocalDate today = LocalDate.now();
 
-        List<RitualLog> uncompletedLogs = ritualLogRepository.findByDateAndCompletedFalse(today);
+        //IMPLEMENT WHICH USER ID MISSED THE RITUAL
+        List<RitualLog> uncompletedLogs = ritualLogRepository.findByDate(today);
 
         for(RitualLog logEntry : uncompletedLogs){
             logEntry.setMissed(true);
-            logEntry.setXpPenalty(20);
         }
         ritualLogRepository.saveAll(uncompletedLogs);
         log.info("Marked {} rituals as missed for date {}", uncompletedLogs.size(), today);
-    }
-
-    public void markRitualAsCompleted(Long ritualLogId, String name){
-        RitualLog ritualLog = ritualLogRepository.findById(ritualLogId)
-                .orElseThrow(() -> new RuntimeException("Ritual not found"));
-
-        Ritual ritual = ritualLog.getRitual();
-        User user = ritual.getUser();
-
-        if (!user.getUsername().equals(name)) {
-            throw new SecurityException("You are not allowed to modify this ritual");
-        }
-
-        if (ritualLog.isCompleted()) {
-            throw new IllegalStateException("Ritual already completed");
-        }
-
-        ritualLog.setCompleted(true);
-        ritualLog.setCompletedAt(LocalDateTime.now());
-        ritualLogRepository.save(ritualLog);
     }
 }
